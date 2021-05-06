@@ -1,0 +1,18 @@
+---
+version: '3'
+services:
+  shark-db:
+    image: gctoutin/sharkdb:latest
+    container_name: shark-db
+    ports:
+      - 6413:6379
+    volumes:
+      - ../data/redis.conf:/data/redis.conf
+
+  shark-api:
+    image: gctoutin/sharkapi:latest
+    container_name: shark-api
+    environment:
+      - REDIS_IP=shark-db
+    ports:
+      - 5033:5000

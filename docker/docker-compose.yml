@@ -11,8 +11,11 @@ services:
 
   shark-api:
     image: gctoutin/sharkapi:latest
+    build: .
     container_name: shark-api
     environment:
       - REDIS_IP=shark-db
+      - FLASK_ENV = "test"
+      - FLASK_APP = "api.py"
     ports:
       - 5033:5000

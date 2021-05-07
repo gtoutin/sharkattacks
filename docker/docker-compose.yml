@@ -19,3 +19,16 @@ services:
       - FLASK_APP = "api.py"
     ports:
       - 5033:5000
+    depends_on:
+      - shark-db
+    volumes:
+      - ../sharkattacks.json:/app/sharkattacks.json
+
+  shark-wrk:
+    image: gctoutin/sharkwrk:latest
+    build: .
+    container_name: shark-wrk
+    environment:
+      - REDIS_IP=shark-db
+    depends_on:
+      - shark-db

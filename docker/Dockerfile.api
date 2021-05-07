@@ -1,12 +1,28 @@
-FROM ubuntu:latest
-RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
-COPY requirements.txt /app/
-WORKDIR /app
+FROM python:3.9
+
+ADD requirements.txt /requirements.txt
 RUN pip install -r requirements.txt
-COPY /src/api.py /app/
-ENV FLASK_APP="api.py"
+COPY /src/ /app/
+WORKDIR /app
+
+ENV FLASK_APP=api.py
 ENV FLASK_ENV="test"
 ENV REDIS_IP=127.0.0.1
+
 ENTRYPOINT ["python"]
 CMD ["api.py"]
+
+
+#FROM ubuntu:latest
+#RUN apt-get update -y
+#RUN apt-get install -y python-pip python-dev build-essential
+#COPY requirements.txt /app/
+#WORKDIR /app
+#RUN pip install -r requirements.txt
+#COPY /src/ /app/
+#COPY sharkattacks.json /app/sharkattacks.json
+#ENV FLASK_APP="api.py"
+#ENV FLASK_ENV="test"
+#ENV REDIS_IP=127.0.0.1
+#ENTRYPOINT ["python"]
+#CMD ["api.py"]

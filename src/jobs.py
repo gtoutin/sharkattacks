@@ -8,47 +8,58 @@ import os
 
 redis_ip = os.environ.get('REDIS_IP')
 
-q = HotQueue("queue", host=redis_ip, port=6379, db=1)
-rd = redis.StrictRedis(host=redis_ip, port=6379, db=0)
+q = HotQueue("queue", host=redis_ip, port=6379, db=1, decode_responses=True)  # this queue sends job keys to the workers
+rd = redis.StrictRedis(host=redis_ip, port=6379, db=0, decode_responses=True)  # this db contains info about jobs
+data = redis.StrictRedis(host=redis_ip, port=6379, db=2, decode_responses=True)  # this db contains all the records
 
 def _generate_jid():
     return str(uuid.uuid4())
 
-def _generate_job_key(jid):
+def generate_job_key(jid):
     return 'job.{}'.format(jid)
 
-def _instantiate_job(jid, job_dict):
+def _instantiate_job(jid, origdict, status='submitted'):
     if type(jid) == str:
-        job_dict['jobid'] = jid
-        return job_dict
+        newdict = origdict
+        print(newdict)
+        newdict['jid'] = jid
+        newdict['status'] = status
+        return newdict
 
-    job_dict['jobid'] = jid.decode('utf-8')
-    return job_dict
+    newdict = origdict
+    newdict['jid'] = jid
+    newdict['status'] = status
+    for entry in newdict:
+        if not type(entry) == str:
+            newdict[entry] = newdict[entry].decode('utf-8')
+    return newdict
 
-def _save_job(job_key, job_dict):
+def _save_job(job_key, job_dict):  # a job object goes in the redis database
     """Save a job object in the Redis database."""
-    rd.hmset(job_key, job_dict)
+    rd.hmset(job_key, job_dict)  # jobkey = job.{jid}, job_dict is the original dict with the jid and status added
 
 def _queue_job(jid):
     """Add a job to the redis queue."""
     q.put(jid)
 
-def add_job(jobdict, status="submitted"):
+def add_job(origdict, status="submitted"):  # given the original input to create a job and maybe status
     """Add a job to the redis queue."""
-    jid = _generate_jid()
-    job_dict = _instantiate_job(jid, jobdict)
+    jid = _generate_jid()  # create a uid for the job
+    job_dict = _instantiate_job(jid, status, origdict) # add the id and status into the existing dictionary
     # update call to save_job:
-    _save_job(_generate_job_key(jid), job_dict)
+    _save_job(generate_job_key(jid), job_dict)  # put the job and data in the redis db
     # update call to queue_job:
-    _queue_job(jid)
+    _queue_job(jid)  # put the job on the queue so the worker can take it and look up the id
     return job_dict
 
-def update_job_status(jid, newstatus, workerIP):
+def update_job_status(jid, newstatus):  # update the status of the job by altering the dictionary
     """Update the status of job with job id `jid` to status `status`."""
-    jid, status, start, end = rd.hmget(_generate_job_key(jid), 'id', 'status', 'start', 'end')
-    job = _instantiate_job(jid, status, start, end, workerIP)
+#    jid, status, start, end = rd.hmget(generate_job_key(jid), 'id', 'status', 'start', 'end')
+    olddict = rd.hgetall(generate_job_key(jid))
+    print(olddict) 
+    job = _instantiate_job(jid, olddict)  # returns a job dictionary
     if job:
         job['status'] = newstatus
-        _save_job(_generate_job_key(jid), job)
+        _save_job(generate_job_key(jid), job)
     else:
         raise Exception()

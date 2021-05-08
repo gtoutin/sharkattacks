@@ -13,10 +13,10 @@ if not redis_ip:
 
 
 app = Flask(__name__)
-#rd = redis.StrictRedis(host=redis_ip, port=6413, db=0)  # db=0 for database
-#q = HotQueue('queue', host=redis_ip, port=6413, db=1)   # db=1 for queue
+
 rd = jobs.rd
 q = jobs.q
+data = jobs.data
 
 
 # v--- routes ---v
@@ -27,7 +27,7 @@ def info():
   Routes:
 
   /					info
-  /loaddata/				load data into Redis DB (not functional)
+  /loaddata/				load data into Redis DB
   /records/info/			information about the records
   /records/<attribute>/<value>/		get all records with an attribute with a certain value
   /records/contains/<word>/		TODO get all records that have a certain word
@@ -64,11 +64,9 @@ def record_info():
 @app.route('/loaddata/', methods=['GET'])
 def load_data():
   with open('sharkattacks.json', 'r', encoding='utf-8-sig') as f:
-      sharks = json.load(f)
-  for record in sharks:
-      print(type(record))
-
-      rd.hmset(record['original order'], record) # add to db
+    sharks = json.load(f)  # sharks is a dict
+    for record in sharks:
+      data.hmset(record['original order'], record) # add the record data to the db
   return "success"
 
 
@@ -81,7 +79,7 @@ def get_records_cust(attrib, value):
   'value': value
 }
   jobdict = jobs.add_job(jobdict)
-  return "Submitted job "+jobdict['jobid']
+  return "Submitted job "+jobdict['jid']
 
 # 
 

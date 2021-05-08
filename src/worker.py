@@ -5,22 +5,18 @@ import redis
 import jobs
 
 
-redis_ip = os.environ.get('REDIS_IP')
-print(redis_ip)
-if not redis_ip:
-  raise Exception()
-
 
 #rd = redis.StrictRedis(host=redis_ip, port=6413, db=0, decode_responses=True)
 #q = HotQueue('queue', host=redis_ip, port=6413, db=1)
 rd = jobs.rd
 q = jobs.q
+data = jobs.data
 
 
 def get_data():  # gets all data in the redis db
   userdata = []
-  for key in rd.keys():
-    userdata.append(str(rd.hgetall(key)))
+  for key in data.keys():
+    userdata.append(data.hgetall(key))
   return userdata
 
 # DONE convert dict full of binary strings to one with regular strings
@@ -36,29 +32,29 @@ def bintoregular(anims):
 
 
 
-def attribval(data):  # get all records with attribute of value
-  jobs.update_job_status(jid, 'in progress')
+def attribval(indict):  # get all records with attribute of value
+  jobs.update_job_status(indict['jid'], 'in progress')
   records = get_data()  # get the db data
-
-  attrib = data['attrib']
-  value = data['value']
+  attrib = indict['attrib']
+  value = indict['value']
 
   output = []
-  output = [ x for x in bintoregular(anims) if str(x[str(attrib)]) == str(value) ]
+  output = [ x for x in records if x[attrib] == value ]
 
-  rd.hset(jid, json.dumps(output))
+  rd.hset(jid, 'result', str(output))  # dump the output list to a string and put it in  !!!! FIX THIS ITS ALMOST RIGHT
 
   jobs.update_job_status(jid, 'complete')
 
 
 @q.worker
-def runjobs(job):  # passes in a job id so worker can get the job off the queue
-  data = rd.hgetall(job) 
-  print(data)
-  if data['type'] == 'attribval':
-    attribval(data)  # do the appropriate job function
+def runjobs(jid):  # passes in a job key so worker can get the job off the queue
+  indict = rd.hgetall(jobs.generate_job_key(jid))
+  print(type(indict)) 
+  if indict['type'] == 'attribval':
+    attribval(indict)  # do the appropriate job function
 
 
 
 if __name__ == '__main__':
   runjobs()
+

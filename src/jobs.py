@@ -44,8 +44,8 @@ def _queue_job(jid):
 
 def add_job(origdict, status="submitted"):  # given the original input to create a job and maybe status
     """Add a job to the redis queue."""
-    print(type(origdict))
-    print(origdict)
+    #print(type(origdict))
+    #print(origdict)
     jid = _generate_jid()  # create a uid for the job
     job_dict = _instantiate_job(jid, origdict, status) # add the id and status into the existing dictionary
     # update call to save_job:
@@ -65,3 +65,12 @@ def update_job_status(jid, newstatus):  # update the status of the job by alteri
         _save_job(generate_job_key(jid), job)
     else:
         raise Exception()
+
+def update_job_result(jid, result):  # update the result of the job by altering the dictionary
+    recorddict = rd.hgetall(generate_job_key(jid))
+
+    recorddict['result'] = result
+    
+    _save_job(generate_job_key(jid), recorddict)
+
+

@@ -7,4 +7,5 @@ WORKDIR /app/
 ENV REDIS_IP=127.0.0.1
 
 ENTRYPOINT ["python"]
+CMD ["-u"]
 CMD ["worker.py"]

@@ -29,9 +29,11 @@ def info():
   /					info
   /loaddata/				load data into Redis DB
   /records/info/			information about the records
-  /records/<attribute>/<value>/		get all records with an attribute with a certain value
+  /records/<attribute>/<value>/		WIP get all records with an attribute with a certain value
   /records/contains/<word>/		TODO get all records that have a certain word
   /records/<record id>/			TODO get a specific record
+  /job/<job id>/			view the information about a submitted job
+  /result/<job id>/			WIP see the result of a submitted job
   /viz/<attrib>/<startdate>/<enddate>/	TODO vizualize an attribute from start to end date.
 
 """
@@ -78,11 +80,19 @@ def get_records_cust(attrib, value):
   'attrib': str(attrib),
   'value': str(value)
 }
-  print(type(jobdict))
+  print('jobdict',type(jobdict))
   jobdict = jobs.add_job(jobdict)
   return "Submitted job "+jobdict['jid']
 
-# 
+# return info about a certain job
+@app.route('/job/<wantedid>/', methods=['GET'])
+def getjob(wantedid):
+  return rd.hgetall('job.'+wantedid)
+
+# return result of a job
+@app.route('/result/<wantedid>/', methods=['GET'])
+def getresult(wantedid):
+  return rd.hget('job.'+wantedid, 'result')
 
 
 if __name__=='__main__':

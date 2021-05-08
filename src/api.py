@@ -63,7 +63,7 @@ def record_info():
 # DONE load data from json to db
 @app.route('/loaddata/', methods=['GET'])
 def load_data():
-  with open('sharkattacks.json', 'r', encoding='utf-8-sig') as f:
+  with open('sharkattacks.json', 'r', encoding='utf-8-sig') as f:  # encoding='utf-8-sig'
     sharks = json.load(f)  # sharks is a dict
     for record in sharks:
       data.hmset(record['original order'], record) # add the record data to the db
@@ -75,9 +75,10 @@ def load_data():
 def get_records_cust(attrib, value):
   jobdict = {
   'type': 'attribval',
-  'attrib': attrib,
-  'value': value
+  'attrib': str(attrib),
+  'value': str(value)
 }
+  print(type(jobdict))
   jobdict = jobs.add_job(jobdict)
   return "Submitted job "+jobdict['jid']
 
@@ -86,3 +87,4 @@ def get_records_cust(attrib, value):
 
 if __name__=='__main__':
   app.run(debug=True, host='0.0.0.0')
+

@@ -35,6 +35,7 @@ def info():
   /records/id/<record id>/			get a specific record (specify original order parameter)
   /records/delete/<record id>/			delete a specific record. Returns list of keys that were deleted.
   /records/add/					POST a json dict containing a shark attack into the db. Will overwrite existing record if the original orders match. Returns True if successful.
+  /records/edit/<recordid>/<attrib>/<value>/	edit the record with the id's attribute to be value. returns True
   /job/<job id>/				view the information about a submitted job
   /result/<job id>/				see the result of a submitted job
   /viz/<attrib>/<startyear>/<endyear>/		TODO visualize an attribute over a selection of years. Available attributes are Age, Sex, Fatal.
@@ -140,6 +141,19 @@ def add_record():
     return "Submitted job "+jobdict['jid']
   else:
     return ""
+
+
+# edit a record's attribute
+@app.route('/records/edit/<recordid>/<attrib>/<value>/', methods=['GET'])
+def editrecord(recordid, attrib, value):
+
+  jobdict = { 
+    'type': 'editrecord',
+    'recordid':recordid,
+    'attrib':attrib,
+    'value':value }
+  jobdict = jobs.add_job(jobdict)
+  return "Submitted job "+jobdict['jid']
 
 
 if __name__=='__main__':

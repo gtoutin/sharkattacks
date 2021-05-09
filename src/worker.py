@@ -69,6 +69,19 @@ def addrecord(indict):  # add the new record
   return True
 
 
+def editrecord(indict):  # edit an existing record's attribute
+  records = get_data()
+  recordid = indict['recordid']
+  attrib = indict['attrib']
+  value = indict['value']
+
+  data.hset(recordid, attrib, value)
+
+  return True
+  
+
+
+
 @q.worker
 def runjobs(jid):  # passes in a job key so worker can get the job off the queue
   print('worker activated', file=sys.stderr)
@@ -89,6 +102,8 @@ def runjobs(jid):  # passes in a job key so worker can get the job off the queue
     output = record_delete(indict)
   if indict['type'] == 'addrecord':
     output = addrecord(indict)
+  if indict['type'] == 'editrecord':
+    output = editrecord(indict)
 
   rd.hset(f'job.{jid}', 'result', str(output))  # put the result in the job entry in the db
   jobs.update_job_status(jid, 'complete')  # now it's done

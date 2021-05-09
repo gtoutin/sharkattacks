@@ -5,6 +5,7 @@ from hotqueue import HotQueue
 import redis
 from redis import StrictRedis
 import os
+import sys
 
 redis_ip = os.environ.get('REDIS_IP')
 
@@ -18,20 +19,13 @@ def _generate_jid():
 def generate_job_key(jid):
     return 'job.{}'.format(jid)
 
-def _instantiate_job(jid, origdict, status='submitted'):
-    if type(jid) == str:
-        newdict = origdict
-        print(newdict)
-        newdict['jid'] = jid
-        newdict['status'] = status
-        return newdict
-
+def _instantiate_job(jid, origdict, changekey, changeval):  # changes/adds a key:value to the job dict
     newdict = origdict
     newdict['jid'] = jid
-    newdict['status'] = status
-#    for entry in newdict:
-    #    if not type(entry) == str:
-    #        newdict[entry] = newdict[entry].decode('utf-8')
+    newdict[changekey] = changeval
+
+    print(newdict, file=sys.stderr)
+
     return newdict
 
 def _save_job(job_key, job_dict):  # a job object goes in the redis database
@@ -47,7 +41,7 @@ def add_job(origdict, status="submitted"):  # given the original input to create
     #print(type(origdict))
     #print(origdict)
     jid = _generate_jid()  # create a uid for the job
-    job_dict = _instantiate_job(jid, origdict, status) # add the id and status into the existing dictionary
+    job_dict = _instantiate_job(jid, origdict, 'status',status) # add the id and status into the existing dictionary
     # update call to save_job:
     _save_job(generate_job_key(jid), job_dict)  # put the job and data in the redis db
     # update call to queue_job:
@@ -59,18 +53,17 @@ def update_job_status(jid, newstatus):  # update the status of the job by alteri
 #    jid, status, start, end = rd.hmget(generate_job_key(jid), 'id', 'status', 'start', 'end')
     olddict = rd.hgetall(generate_job_key(jid))
     print(olddict) 
-    job = _instantiate_job(jid, olddict)  # returns a job dictionary
+    job = _instantiate_job(jid, olddict, 'status', newstatus)  # returns a job dictionary
     if job:
-        job['status'] = newstatus
         _save_job(generate_job_key(jid), job)
     else:
         raise Exception()
 
 def update_job_result(jid, result):  # update the result of the job by altering the dictionary
     recorddict = rd.hgetall(generate_job_key(jid))
-
-    recorddict['result'] = result
-    
+    print(recorddict, file=sys.stderr)
+    recorddict = _instantiate_job(jid, recorddict, 'result', str(result))
+    print(recorddict, file=sys.stderr)
     _save_job(generate_job_key(jid), recorddict)
 
 

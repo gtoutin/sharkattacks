@@ -5,6 +5,7 @@ import redis
 import os
 import jobs
 import uuid
+import sys
 
 
 redis_ip = os.environ.get('REDIS_IP')
@@ -80,8 +81,8 @@ def get_records_cust(attrib, value):
   'attrib': str(attrib),
   'value': str(value)
 }
-  print('jobdict',type(jobdict))
   jobdict = jobs.add_job(jobdict)
+  print(jobdict, file=sys.stderr)
   return "Submitted job "+jobdict['jid']
 
 # return info about a certain job

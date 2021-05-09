@@ -3,6 +3,7 @@ import json
 import os
 import redis
 import jobs
+import sys
 
 
 
@@ -21,6 +22,7 @@ def get_data():  # gets all data in the redis db
 
 
 def attribval(indict):  # get all records with attribute of value
+  print('job',indict['jid'],'has been received',file=sys.stderr)
   jobs.update_job_status(indict['jid'], 'in progress')
   records = get_data()  # get the db data
   attrib = indict['attrib']
@@ -28,7 +30,7 @@ def attribval(indict):  # get all records with attribute of value
 
   output = []
   output = [ x for x in records if x[attrib] == value ]
-
+  print(len(output),file=sys.stderr)
   return output
 
 #  rd.hset(jid, 'result', str(output))  # dump the output list to a string and put it in  !!!! FIX THIS ITS ALMOST RIGHT
@@ -38,15 +40,19 @@ def attribval(indict):  # get all records with attribute of value
 
 @q.worker
 def runjobs(jid):  # passes in a job key so worker can get the job off the queue
+  print('worker activated', file=sys.stderr)
+
   indict = rd.hgetall(jobs.generate_job_key(jid))
-  print(type(indict)) 
+
   if indict['type'] == 'attribval':
     output = attribval(indict)  # do the appropriate job function
 
-  rd.hset(jid, 'result', str(output))
+  rd.hset(f'job.{jid}', 'result', str(output))
   jobs.update_job_status(jid, 'complete')
+  print('try to update status to complete',file=sys.stderr)
 
 
 if __name__ == '__main__':
+  print("worker is alive",file=sys.stderr)
   runjobs()
 

@@ -13,6 +13,10 @@ all-docker: all-db all-api all-wrk
 
 all-build: build-db build-api build-wrk
 
+all-run: run-db run-db push-db
+
+all-push: push-db push-api push-wrk
+
 
 all-db: build-db run-db push-db
 

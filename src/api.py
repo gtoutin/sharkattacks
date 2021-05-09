@@ -32,8 +32,9 @@ def info():
   /records/info/				information about the records
   /records/attribval/<attribute>/<value>/	get all records with an attribute with a certain value
   /records/contains/<word>/			get all records that have a certain word
-  /records/id/<record id>/			get a specific record
-  /records/delete/<record id>/			TODO delete a specific record
+  /records/id/<record id>/			get a specific record (specify original order parameter)
+  /records/delete/<record id>/			delete a specific record. Returns list of keys that were deleted.
+  /records/add/					POST a json dict containing a shark attack into the db. Will overwrite existing record if the original orders match. Returns True if successful.
   /job/<job id>/				view the information about a submitted job
   /result/<job id>/				see the result of a submitted job
   /viz/<attrib>/<startyear>/<endyear>/		TODO visualize an attribute over a selection of years. Available attributes are Age, Sex, Fatal.
@@ -115,6 +116,30 @@ def record_contains(word):
   'word': word }
   jobdict = jobs.add_job(jobdict)
   return "Submitted job "+jobdict['jid']
+
+
+# delete a record with the record id (specify original order)
+@app.route('/records/delete/<recordid>/', methods=['GET'])
+def record_delete(recordid):
+  jobdict = {
+  'type': 'recorddelete',
+  'recordid': str(recordid) }
+  jobdict = jobs.add_job(jobdict)
+  return "Submitted job "+jobdict['jid']
+
+
+# add a new record with POST
+@app.route('/records/add/', methods=['GET','POST'])
+def add_record():
+  if request.method == 'POST':
+    newdata = request.json
+    jobdict = {
+    'type': 'addrecord',
+    'newdata': str(newdata) }
+    jobdict = jobs.add_job(jobdict)
+    return "Submitted job "+jobdict['jid']
+  else:
+    return ""
 
 
 if __name__=='__main__':

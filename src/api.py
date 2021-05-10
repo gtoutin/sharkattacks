@@ -40,7 +40,7 @@ def info():
   /records/edit/<recordid>/<attrib>/<value>/	edit the record with the id's attribute to be value. returns True
   /job/<job id>/				view the information about a submitted job
   /result/<job id>/				see the result of a submitted job
-  /viz/<attrib>/<startyear>/<endyear>/		visualize an attribute over a selection of years. Available attributes are Age, Sex, Fatal. Returns the job. View the result of the job for the filename.
+  /viz/<attrib>/<startyear>/<endyear>/		visualize an attribute over a selection of years. Available attributes are Age.
   /download/<jobid>/				downloads the file (useful for getting plots)
 
 """

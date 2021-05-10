@@ -35,12 +35,12 @@ kubectl exec -it <name of python pod from previous output> -- /bin/bash
 
 To get all possible routes of the Flask app and what they do, hit the / route of the app for the front page.
 ```bash
-curl 10.110.18.41:5033/
+curl 10.110.18.41:5000/
 ```
 
 Before any of the routes can be used, you must first load the data from the ```sharkattacks.json``` data file provided.
 ```bash
-curl 10.110.18.41:5033/loaddata
+curl 10.110.18.41:5000/loaddata
 ```
 
 ### Routes
@@ -59,29 +59,29 @@ curl 10.110.18.41:5033/loaddata
 - ```/download/<file name>/``` download the file to the local user. meant to be used with ```/viz/...``` to download the plot produced.
 
 ### Examples
-- ```curl localhost:5033/records/attribval/Year/2015/```
-- ```curl localhost:5033/records/contains/surf/```
-- ```curl localhost:5033/records/id/2023/```
-- ```curl localhost:5033/records/delete/2023/```
-- ```curl localhost:5033/records/add/ -X POST -H "Content-Type: application/json" -d '@./example.json'``` 
-- ```curl localhost:5033/records/edit/2023/Species/tiger/```
-- ```curl localhost:5033/job/c1681e6f-7c74-42ff-8545-0f676f3e0407/```
-- ```curl localhost:5033/result/c1681e6f-7c74-42ff-8545-0f676f3e0407/```
-- ```curl localhost:5033/viz/Age/2017/2019/```
-- ```curl localhost:5033/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` 
+- ```curl 10.110.18.41:5000/records/attribval/Year/2015/```
+- ```curl 10.110.18.41:5000/records/contains/surf/```
+- ```curl 10.110.18.41:5000/records/id/2023/```
+- ```curl 10.110.18.41:5000/records/delete/2023/```
+- ```curl 10.110.18.41:5000/records/add/ -X POST -H "Content-Type: application/json" -d '@./example.json'``` 
+- ```curl 10.110.18.41:5000/records/edit/2023/Species/tiger/```
+- ```curl 10.110.18.41:5000/job/c1681e6f-7c74-42ff-8545-0f676f3e0407/```
+- ```curl 10.110.18.41:5000/result/c1681e6f-7c74-42ff-8545-0f676f3e0407/```
+- ```curl 10.110.18.41:5000/viz/Age/2017/2019/```
+- ```curl 10.110.18.41:5000/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` 
 
 #### Expected output
 For most of these routes, the expected output must be found in ```/result/<job id>/```
-- ```curl localhost:5033/records/attribval/Year/2015/``` returns a list of dicts
-- ```curl localhost:5033/records/contains/surf/``` returns a list of dicts
-- ```curl localhost:5033/records/id/2023/``` returns a dict
-- ```curl localhost:5033/records/delete/2023/``` returns a list
-- ```curl localhost:5033/records/add/ -X POST -H "Content-Type: application/json" -d '@./example.json'``` returns a boolean
-- ```curl localhost:5033/records/edit/2023/Species/tiger/``` returns True
-- ```curl localhost:5033/job/c1681e6f-7c74-42ff-8545-0f676f3e0407/``` returns a dict
-- ```curl localhost:5033/result/c1681e6f-7c74-42ff-8545-0f676f3e0407/``` returns different things depending on what the job id is.
-- ```curl localhost:5033/viz/Age/2017/2019/``` returns a dict
-- ```curl localhost:5033/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` returns bytes
+- ```curl 10.110.18.41:5000/records/attribval/Year/2015/``` returns a list of dicts
+- ```curl 10.110.18.41:5000/records/contains/surf/``` returns a list of dicts
+- ```curl 10.110.18.41:5000/records/id/2023/``` returns a dict
+- ```curl 10.110.18.41:5000/records/delete/2023/``` returns a list
+- ```curl 10.110.18.41:5000/records/add/ -X POST -H "Content-Type: application/json" -d '@./example.json'``` returns a boolean
+- ```curl 10.110.18.41:5000/records/edit/2023/Species/tiger/``` returns True
+- ```curl 10.110.18.41:5000/job/c1681e6f-7c74-42ff-8545-0f676f3e0407/``` returns a dict
+- ```curl 10.110.18.41:5000/result/c1681e6f-7c74-42ff-8545-0f676f3e0407/``` returns different things depending on what the job id is.
+- ```curl 10.110.18.41:5000/viz/Age/2017/2019/``` returns a dict
+- ```curl 10.110.18.41:5000/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` returns bytes
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

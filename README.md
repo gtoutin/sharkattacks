@@ -4,23 +4,43 @@ This is a Flask API that interacts with a Redis database.
 
 ## Installation
 
-Installation is simple. Copy over the folder and enter it. Once inside, start up the containers with docker-compose.
+Installation is simple. Copy over the folder and enter it. Once inside, start up the containers with kubernetes.
 
 ```bash
 cd sharkattacks
-docker-compose up --build
+make all-kube
 ```
 
 ## Usage
 
-To all possible routes of the Flask app and what they do, hit the / route of the app for the front page.
+To use the Flask service, you need the IP address of the Flask service.
 ```bash
-curl localhost:5033/
+kubectl get services -o wide
+```
+Example output:
+```
+NAME                          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE   SELECTOR
+shark-flask-service           ClusterIP   10.110.18.41     <none>        5000/TCP         60m   app=shark-flask
+shark-service                 ClusterIP   10.99.4.21       <none>        6379/TCP         61m   app=shark-redis
+```
+
+You will also need a Python debug pod to access this IP address from inside the cluster. This pod contains an environment that can access the Flask API.
+```bash
+kubectl apply -f deployment-python-debug.yml
+kubectl get pods -o wide
+kubectl exec -it <name of python pod from previous output> -- /bin/bash
+```
+
+#### Note: you may need to change the REDIS_IP environment variable to the IP for ```shark-service```
+
+To get all possible routes of the Flask app and what they do, hit the / route of the app for the front page.
+```bash
+curl 10.110.18.41:5033/
 ```
 
 Before any of the routes can be used, you must first load the data from the ```sharkattacks.json``` data file provided.
 ```bash
-curl localhost:5033/loaddata
+curl 10.110.18.41:5033/loaddata
 ```
 
 ### Routes
@@ -50,15 +70,18 @@ curl localhost:5033/loaddata
 - ```curl localhost:5033/viz/Age/2017/2019/```
 - ```curl localhost:5033/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` 
 
-## Stopping
-Once finished with the app, the Docker containers must be stopped and then removed.
-```bash
-docker stop gctoutin-flask
-docker stop gctoutin-redis
-docker rm gctoutin-flask
-docker rm gctoutin-redis
-```
-Their deletion can be confirmed with ```docker ps -a```
+#### Expected output
+For most of these routes, the expected output must be found in ```/result/<job id>/```
+- ```curl localhost:5033/records/attribval/Year/2015/``` returns a list of dicts
+- ```curl localhost:5033/records/contains/surf/``` returns a list of dicts
+- ```curl localhost:5033/records/id/2023/``` returns a dict
+- ```curl localhost:5033/records/delete/2023/``` returns a list
+- ```curl localhost:5033/records/add/ -X POST -H "Content-Type: application/json" -d '@./example.json'``` returns a boolean
+- ```curl localhost:5033/records/edit/2023/Species/tiger/``` returns True
+- ```curl localhost:5033/job/c1681e6f-7c74-42ff-8545-0f676f3e0407/``` returns a dict
+- ```curl localhost:5033/result/c1681e6f-7c74-42ff-8545-0f676f3e0407/``` returns different things depending on what the job id is.
+- ```curl localhost:5033/viz/Age/2017/2019/``` returns a dict
+- ```curl localhost:5033/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` returns bytes
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

@@ -1,0 +1,35 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shark-flask
+  labels:
+    app: shark-flask
+    username: gctoutin
+    env: test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shark-flask
+  template:
+    metadata:
+      labels:
+        app: shark-flask
+        username: gctoutin
+        env: test
+    spec:
+      containers:
+        - name: shark-flask
+          imagePullPolicy: Always
+          image: gctoutin/sharkapi:latest
+          env:
+            - name: "FLASK_APP"
+              value: "api.py"
+            - name: "FLASK_ENV"
+              value: "test"
+            - name: "REDIS_IP"
+              value: "10.99.4.21" # CHANGED!
+          ports:
+          - name: http
+            containerPort: 5000

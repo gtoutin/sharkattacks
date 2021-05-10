@@ -80,7 +80,7 @@ def load_data():
 
 
 # get all records with an attribute with a certain value. SEND A JOB
-@app.route('/records/<attrib>/<value>/', methods=['GET'])
+@app.route('/records/attribval/<attrib>/<value>/', methods=['GET'])
 def get_records_cust(attrib, value):
   jobdict = {
   'type': 'attribval',

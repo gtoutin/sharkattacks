@@ -1,0 +1,32 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shark-redis
+  labels:
+    app: shark-redis
+    username: gctoutin
+    env: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shark-redis
+  template:
+    metadata:
+      labels:
+        app: shark-redis
+        username: gctoutin
+        env: test
+    spec:
+      containers:
+        - name: shark-redis
+          imagePullPolicy: Always
+          image: redis:5.0.0
+          volumeMounts:
+          - name: shark-pvc
+            mountPath: "/data"
+      volumes:
+        - name: shark-pvc
+          persistentVolumeClaim:
+            claimName: shark-pvc

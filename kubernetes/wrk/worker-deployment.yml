@@ -1,0 +1,28 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shark-worker-deployment
+  labels:
+    app: shark-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shark-worker
+  template:
+    metadata:
+      labels:
+        app: shark-worker
+    spec:
+      containers:
+        - name: shark-worker-deployment
+          imagePullPolicy: Always
+          image: gctoutin/sharkwrk:latest
+          env:
+          - name: "REDIS_IP"
+            value: "10.99.4.21"  # CHANGED!
+          - name: "WORKER_IP"
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP

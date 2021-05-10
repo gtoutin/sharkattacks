@@ -29,6 +29,7 @@ def attribval(indict):  # get all records with attribute of value
 
   output = []
   output = [ x for x in records if x[attrib] == value ]
+  print(output)
   return output
 
 
@@ -142,7 +143,6 @@ def runjobs(jid):  # passes in a job key so worker can get the job off the queue
     output = editrecord(indict)
   if indict['type'] == 'viz':
     output = vizrecords(indict)  # returns image as a bytes object
-  else: output = []
 
   rd.hset(f'job.{jid}', 'result', str(output))  # put the result in the job entry in the db
   jobs.update_job_status(jid, 'complete')  # now it's done

@@ -48,7 +48,7 @@ curl localhost:5033/loaddata
 - ```curl localhost:5033/job/c1681e6f-7c74-42ff-8545-0f676f3e0407/```
 - ```curl localhost:5033/result/c1681e6f-7c74-42ff-8545-0f676f3e0407/```
 - ```curl localhost:5033/viz/Age/2017/2019/```
-- ```curl localhost:5033/download/c1681e6f-7c74-42ff-8545-0f676f3e0407plot/ > output.png``` 
+- ```curl localhost:5033/download/c1681e6f-7c74-42ff-8545-0f676f3e0407/ > output.png``` 
 
 ## Stopping
 Once finished with the app, the Docker containers must be stopped and then removed.

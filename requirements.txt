@@ -1,3 +1,5 @@
 flask==1.1.1
 hotqueue==0.2.8
 redis==3.5.3
+matplotlib
+numpy

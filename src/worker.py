@@ -4,14 +4,15 @@ import os
 import redis
 import jobs
 import sys
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 
-#rd = redis.StrictRedis(host=redis_ip, port=6413, db=0, decode_responses=True)
-#q = HotQueue('queue', host=redis_ip, port=6413, db=1)
 rd = jobs.rd
 q = jobs.q
 data = jobs.data
+images = jobs.images
 
 
 def get_data():  # gets all data in the redis db
@@ -28,7 +29,6 @@ def attribval(indict):  # get all records with attribute of value
 
   output = []
   output = [ x for x in records if x[attrib] == value ]
-  print(len(output),file=sys.stderr)
   return output
 
 
@@ -80,6 +80,42 @@ def editrecord(indict):  # edit an existing record's attribute
   return True
   
 
+def vizrecords(indict):
+  records = get_data()
+  attrib = indict['attrib']
+  startyear = int(indict['startyear'])
+  endyear = int(indict['endyear'])
+  jid = indict['jid']
+  
+  x = range(startyear, endyear+1)  # create list of every year between and including the years
+
+  if attrib=='Age':
+    avgages = []  # want to plot avg age vs year
+    for year in x:  # loop thru all relevant years
+      year = str(year)
+      yearrecords = attribval({'attrib':'Year', 'value':year})  # get all records for a year
+
+      agelist = []
+      for y in yearrecords:
+        try:
+          agelist.append(int(y['Age']))
+        except:
+          continue
+      if len(agelist) != 0: avgages.append(sum(agelist)/len(agelist))  # don't divide by 0
+      else: avgages.append(0)
+
+    plt.plot(x, avgages)  # make the plot
+    plt.xlabel('Year')
+    plt.ylabel('Average age')
+    plt.title(f'Average age vs. Year for {startyear}-{endyear}')
+    plt.savefig('/outimg.png')
+
+  with open('/outimg.png', 'rb') as f:	# opens /jidplot.png as f
+    image = f.read()	# reads saved plot into binary
+  images.set(jid, image)
+
+  return jid
+  
 
 
 @q.worker
@@ -104,6 +140,9 @@ def runjobs(jid):  # passes in a job key so worker can get the job off the queue
     output = addrecord(indict)
   if indict['type'] == 'editrecord':
     output = editrecord(indict)
+  if indict['type'] == 'viz':
+    output = vizrecords(indict)  # returns image as a bytes object
+  else: output = []
 
   rd.hset(f'job.{jid}', 'result', str(output))  # put the result in the job entry in the db
   jobs.update_job_status(jid, 'complete')  # now it's done

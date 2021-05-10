@@ -12,6 +12,7 @@ redis_ip = os.environ.get('REDIS_IP')
 q = HotQueue("queue", host=redis_ip, port=6379, db=1)  # this queue sends job keys to the workers
 rd = redis.StrictRedis(host=redis_ip, port=6379, db=0, decode_responses=True)  # this db contains info about jobs
 data = redis.StrictRedis(host=redis_ip, port=6379, db=2, decode_responses=True)  # this db contains all the records
+images = redis.StrictRedis(host=redis_ip, port=6379, db=3)	# this db is only for images
 
 def _generate_jid():
     return str(uuid.uuid4())

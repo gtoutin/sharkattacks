@@ -6,6 +6,7 @@ import os
 import jobs
 import uuid
 import sys
+import time
 
 
 redis_ip = os.environ.get('REDIS_IP')
@@ -18,6 +19,7 @@ app = Flask(__name__)
 rd = jobs.rd
 q = jobs.q
 data = jobs.data
+images = jobs.images
 
 
 # v--- routes ---v
@@ -38,7 +40,8 @@ def info():
   /records/edit/<recordid>/<attrib>/<value>/	edit the record with the id's attribute to be value. returns True
   /job/<job id>/				view the information about a submitted job
   /result/<job id>/				see the result of a submitted job
-  /viz/<attrib>/<startyear>/<endyear>/		TODO visualize an attribute over a selection of years. Available attributes are Age, Sex, Fatal.
+  /viz/<attrib>/<startyear>/<endyear>/		visualize an attribute over a selection of years. Available attributes are Age, Sex, Fatal. Returns the job. View the result of the job for the filename.
+  /download/<file name>/			TODO downloads the file (useful for getting plots)
 
 """
 
@@ -85,7 +88,6 @@ def get_records_cust(attrib, value):
   'value': str(value)
 }
   jobdict = jobs.add_job(jobdict)
-  print(jobdict, file=sys.stderr)
   return "Submitted job "+jobdict['jid']
 
 # return info about a certain job
@@ -140,7 +142,7 @@ def add_record():
     jobdict = jobs.add_job(jobdict)
     return "Submitted job "+jobdict['jid']
   else:
-    return ""
+    return "Please use POST\n"
 
 
 # edit a record's attribute
@@ -154,6 +156,32 @@ def editrecord(recordid, attrib, value):
     'value':value }
   jobdict = jobs.add_job(jobdict)
   return "Submitted job "+jobdict['jid']
+
+
+# visualize an attribute through the selected years
+@app.route('/viz/<attrib>/<startyear>/<endyear>/', methods=['GET'])
+def vizrecords(attrib, startyear, endyear):
+  jobdict = {
+    'type': 'viz',
+    'attrib': attrib,
+    'startyear': startyear,
+    'endyear': endyear }
+  jobdict = jobs.add_job(jobdict)
+
+  jid = jobdict['jid']
+
+  return "Submitted job "+jid
+  
+
+
+# download a plot
+@app.route('/download/<jid>/', methods=['GET'])
+def dlviz(jid):
+  path = f'/app/{jid}.png'	# define where image will go
+  with open(path, 'wb') as f:	#
+    f.write(images.get(jid))	# get the image byte data and write it to the path location
+  return send_file(path, mimetype='image/png', as_attachment=True)  # send it to the user
+
 
 
 if __name__=='__main__':

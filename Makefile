@@ -9,6 +9,24 @@ ps-me:
 	docker ps -a | grep ${NAME}
 
 
+all-kube: kube-db kube-api kube-wrk
+
+kube-db:
+	kubectl apply -f ./kubernetes/db/redis-deployment.yml
+	kubectl apply -f ./kubernetes/db/redis-service.yml
+	kubectl apply -f ./kubernetes/db/redis-pvc.yml
+
+kube-api:
+	kubectl apply -f ./kubernetes/api/flask-deployment.yml
+	kubectl apply -f ./kubernetes/api/flask-service.yml
+
+kube-wrk:
+	kubectl apply -f ./kubernetes/wrk/worker-deployment.yml
+
+kube-py:
+	kubectl apply -f ./kubernetes/deployment-python-debug.yml
+
+
 all-docker: all-db all-api all-wrk
 
 all-build: build-db build-api build-wrk
